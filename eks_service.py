@@ -28,18 +28,6 @@ RESTRICTED_EKS_TAG_VALUE_SET_CHARACTERS = r"[^a-zA-Z0-9\s_\.:+/=\\@-]"
 
 INF_FETCHING_RESOURCES = "Fetching eks {} for account {} in region {}"
 
-
-# DEBUG_READ_REPLICA = (
-#     'Can not schedule eks instance "{}" because it is a read replica of instance {}'
-# )
-
-# DEBUG_SKIPPING_INSTANCE = (
-#     "Skipping eks {} {} because it is not in a start or stop-able state ({})"
-# )
-# DEBUG_WITHOUT_SCHEDULE = "Skipping eks {} {} without schedule"
-# DEBUG_SELECTED = "Selected eks instance {} in state ({}) for schedule {}"
-# DEBUG_NO_SCHEDULE_TAG = "Instance {} has no schedule tag named {}"
-
 WARN_TAGGING_STARTED = "Error setting start or stop tags to started instance {}, ({})"
 WARN_TAGGING_STOPPED = "Error setting start or stop tags to stopped instance {}, ({})"
 WARN_EKS_TAG_VALUE = (
@@ -100,7 +88,7 @@ class EksService:
         resource_name = resource_name[0].upper() + resource_name[1:]
         
         args = {}
-        resources = [] ## service
+        resources = [] ## deployment/rollout
         done = False
         self._logger.info(
             INF_FETCHING_RESOURCES, resource_name, self._account, self._region
@@ -108,7 +96,6 @@ class EksService:
         cluster_list = client.list_clusters()
         for target_cluster in cluster_list["clusters"] :
             cluster_info = client.describe_cluster(name=target_cluster)
-            ## cluster tags 에 Schedule:on 이 없으면 대상에서 제외함
             if "Schedule" not in cluster_info['cluster']['tags'] :
                 continue
             if cluster_info['cluster']['tags']['Schedule'] != "on" :
@@ -194,7 +181,7 @@ class EksService:
             deployName = deploy_data["metadata"]["name"] ## already filtered by "Schedule"
             namespace = deploy_data["metadata"]["namespace"]
             tags = deploy_data["metadata"]["annotations"]
-            if "replicas" not in deploy_data["metadata"]["annotations"] and replicas == 0: ##꺼져 있는데 저장된 값도 없는 상태 
+            if "replicas" not in deploy_data["metadata"]["annotations"] and replicas == 0:
                 self._logger.warning(
                     "check {}, saved replicas in annotation and current replica", deployName
                 )
@@ -262,7 +249,7 @@ class EksService:
                     },
                     "metadata":{
                         "annotations": {
-                            "replicas" : str(eks_service.replicas) ##현재값을 label에 저장해둬야함
+                            "replicas" : str(eks_service.replicas)
                         }
                     }
                 }
