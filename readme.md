@@ -86,3 +86,7 @@ path : instance_scheduler > scheulders > eks_service.py
 
 ### 5. EKS cluster tag 추가
 key:value 로 Schedule:on 이 존재해야 해당 cluster에 대해 스케쥴링을 수행한다.  
+
+### 6. deployment/rollout에 annotation 추가
+스케쥴러는 자원에 특정 tag가 있을 때 해당 자원에 대해 스케쥴링을 수행한다.  
+default 는 Schedule이다. dynamodb table에 있는 schedule 중 하나를 선택하여 key:value 로 Schedule:{schedule_name} 을 달아준다.  
